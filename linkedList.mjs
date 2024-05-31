@@ -1,45 +1,45 @@
 class LinkedList {
-  constructor(node) {
-    this.head = node;
+  constructor(key, value) {
+    this.list = new Node(key, value);
   }
 
   getHead() {
-    return this.head.next;
+    return this.list;
   }
-  getTail(node = this.head) {
+  getTail(node = this.list) {
     //Wanted to try a recursive method
     if (!node) return "undefined";
-    if (node.getNext() === null) return node;
-    return this.getTail(node.getNext());
+    if (node.next === null) return node;
+    return this.getTail(node.next);
   }
 
   append(key, value) {
-    if (this.head.getNext() === null) {
-      this.head.next = new Node(key, value);
+    if (this.list.next === null) {
+      this.list.next = new Node(key, value);
     } else {
-      this.getTail().setNext(new Node(value));
+      this.getTail().setNext(new Node(key, value));
     }
   }
 
   prepend(value) {
-    if (this.head.next === null) {
-      this.head.next = new Node(value);
+    if (this.list.next === null) {
+      this.list.next = new Node(key, value);
     } else {
-      const temp = this.head.next;
-      this.head.next = new Node(value, temp);
+      const temp = this.list.next;
+      this.list.next = new Node(key, value, temp);
     }
   }
   size() {
     // wanted to try an iterative method
-    if (this.head.next === null) return 1;
+    if (this.list.next === null) return 1;
     let count = 1;
     let checkNext = true;
-    let current = this.head.getNext();
+    let current = this.list.next;
 
     while (checkNext) {
-      if (current.getNext() != null) {
+      if (current.next != null) {
         count++;
-        current = current.getNext();
+        current = current.next;
       } else {
         count++;
         checkNext = false;
@@ -50,30 +50,30 @@ class LinkedList {
 
   at(index) {
     //index starts at 0
-    if (index === 0) return this.head;
+    if (index === 0) return this.list;
     let count = 1;
     let checkNext = true;
-    let current = this.head.getNext();
+    let current = this.list.next;
 
     while (checkNext) {
-      if (current.getNext() != null) {
+      if (current.next != null) {
         if (count === index) return current;
         count++;
-        current = current.getNext();
+        current = current.next;
       } else return "undefined";
     }
   }
   pop() {
-    if (this.head.next === null) return "Empty";
+    if (this.list.next === null) return "Empty";
     let checkNext = true;
-    let current = this.head.getNext();
+    let current = this.list.next;
     let prev = null;
 
     while (checkNext) {
-      if (current.getNext() != null) {
+      if (current.next != null) {
         prev = current;
-        current = current.getNext();
-        if (current.getNext() == null) {
+        current = current.next;
+        if (current.next == null) {
           prev.setNext(null);
         }
       } else {
@@ -83,15 +83,16 @@ class LinkedList {
   }
   contains(key) {
     let checkNext = true;
-    let current = this.head;
+    let current = this.list;
+
     let prev = null;
 
     while (checkNext) {
-      if (current.getNext() != null) {
+      if (current.next != null) {
         if (current.key === key) {
           return current;
         }
-        current = current.getNext();
+        current = current.next;
       } else {
         if (current.key === key) {
           return current;
@@ -103,16 +104,16 @@ class LinkedList {
   }
 
   find(value) {
-    if (this.head.next === null) return "Empty";
+    if (this.list.next === null) return "Empty";
     let checkNext = true;
-    let current = this.head.getNext();
+    let current = this.list;
 
     while (checkNext) {
-      if (current.getNext() != null) {
+      if (current.next != null) {
         if (current.getValue() === value) {
           return current;
         }
-        current = current.getNext();
+        current = current.next;
       } else {
         if (current.getValue() === value) {
           return current;
@@ -123,15 +124,15 @@ class LinkedList {
     return null;
   }
   toString() {
-    if (this.head.next === null) return "Empty";
+    if (this.list.next === null) return "Empty";
     let checkNext = true;
-    let current = this.head.getNext();
+    let current = this.list.next;
     let string = "";
 
     while (checkNext) {
-      if (current.getNext() != null) {
+      if (current.next != null) {
         string += `( ${current.getValue()} ) -> `;
-        current = current.getNext();
+        current = current.next;
       } else {
         string += `( ${current.getValue()} ) -> null`;
         checkNext = false;
@@ -140,17 +141,30 @@ class LinkedList {
     return string;
   }
 
-  insertAt(value, index) {
-    if (this.head.next === null) return "Empty";
-    if (index === 0) return this.head.next;
-    let count = 1;
+  toArray(input) {
+    let arr = [];
     let checkNext = true;
-    let current = this.head.getNext();
-    let prev = this.head;
-    let node = new Node(value);
+    let current = this.list;
 
     while (checkNext) {
-      if (current.getNext() != null) {
+      if (!current.next) checkNext = false;
+      arr.push(current[input]);
+      current = current.next;
+    }
+    return arr;
+  }
+
+  insertAt(value, index) {
+    if (this.list.next === null) return "Empty";
+    if (index === 0) return this.list.next;
+    let count = 1;
+    let checkNext = true;
+    let current = this.list.next;
+    let prev = this.list;
+    let node = new Node(key, value);
+
+    while (checkNext) {
+      if (current.next != null) {
         if (count === index) {
           node.next = current;
           prev.next = node;
@@ -158,7 +172,7 @@ class LinkedList {
         }
         count++;
         prev = current;
-        current = current.getNext();
+        current = current.next;
       } else {
         if (count === index) {
           node.next = current;
@@ -173,27 +187,27 @@ class LinkedList {
     }
   }
 
-  removeAt(index) {
-    let listSize = list.size();
-
-    if (index >= listSize) return console.log("invalid index");
-    if (this.head.next === null) return console.log("Empty");
-    let count = 0;
+  // removing the "head" node made this function need aditional
+  // ifs when removing the first node in the list
+  remove(key) {
     let checkNext = true;
-    let current = this.head.getNext();
-    let prev = this.head;
+    let current = this.list;
+    let prev = null;
 
     while (checkNext) {
-      if (current.getNext() != null) {
-        if (count === index) {
+      if (current.next != null) {
+        if (current.key === key) {
+          if (!prev) {
+            this.list = current.next;
+            return;
+          }
           prev.next = current.next;
           return;
         }
-        count++;
         prev = current;
-        current = current.getNext();
+        current = current.next;
       } else {
-        if (count === index) {
+        if (current.key === key) {
           prev.next = null;
           return;
         }
