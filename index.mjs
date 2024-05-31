@@ -1,13 +1,11 @@
 import { LinkedList, Node } from "./linkedList.mjs";
 
-const HashMap = class {
-  constructor() {
-    this.size = 16;
-    this.buckets = [];
-    this.loadFactor = 0.8;
-  }
+const HashMap = function () {
+  let size = 16;
+  let buckets = [];
+  let loadFactor = 0.8;
 
-  hash(key) {
+  function hash(key) {
     if (typeof key !== "string") throw new Error("Wrong type of key!");
     let hashCode = 0;
 
@@ -19,100 +17,103 @@ const HashMap = class {
     return hashCode;
   }
 
-  set(key, value) {
-    let index = this.hash(key) % this.size;
-    if (this.buckets[index] == null) {
-      this.buckets[index] = new LinkedList(key, value);
+  function set(key, value) {
+    let index = hash(key) % size;
+    if (buckets[index] == null) {
+      checkLoad();
+      index = hash(key) % size;
+      buckets[index] = new LinkedList(key, value);
     } else {
-      let list = this.buckets[index];
+      let list = buckets[index];
       if (list.contains(key)) {
         //if the same key is found, update the value.
         list.contains(key).value = value;
         return;
       }
-
+      checkLoad();
+      index = hash(key) % size;
       list.append(key, value);
-      this.buckets[index] = list;
+      buckets[index] = list;
     }
 
     // need to check load factor
   }
 
-  get(key) {
-    let index = this.hash(key) % this.size;
+  function get(key) {
+    let index = hash(key) % size;
 
-    if (this.buckets[index] == null) {
+    if (buckets[index] == null) {
       return null;
     }
-    let test = this.buckets[index].contains(key);
+    let test = buckets[index].contains(key);
     if (test) return test.value;
     else return null;
   }
 
-  has(key) {
-    let index = this.hash(key) % this.size;
+  function has(key) {
+    let index = hash(key) % size;
 
-    if (this.buckets[index] == null) {
+    if (buckets[index] == null) {
       return false;
     }
-    let test = this.buckets[index].contains(key);
+    let test = buckets[index].contains(key);
     if (test) return true;
     else return false;
   }
-  remove(key) {
-    if (!this.has(key)) {
+  function remove(key) {
+    if (!has(key)) {
       return false;
     }
 
-    let index = this.hash(key) % this.size;
-    let list = this.buckets[index]; //just for clarity
+    let index = hash(key) % size;
+    let list = buckets[index]; //just for clarity
     if (list.size() === 1) {
-      this.buckets[index] = undefined;
+      buckets[index] = undefined;
       return true;
     }
     list.remove(key);
-    this.buckets[index] = list;
+    buckets[index] = list;
     return true;
   }
 
-  length() {
+  function length() {
     let count = 0;
-    for (let i = 0; i < this.size; i++) {
-      if (this.buckets[i]) {
-        count += this.buckets[i].size();
+    for (let i = 0; i < size; i++) {
+      if (buckets[i]) {
+        count += buckets[i].size();
       }
     }
     return count;
   }
-  clear() {
-    this.buckets = [];
+  function clear() {
+    buckets = [];
   }
-  keys() {
+  function keys() {
     let keys = [];
-    for (let i = 0; i < this.size; i++) {
-      if (this.buckets[i]) {
-        keys = [...keys, ...this.buckets[i].toArray("key")];
+    for (let i = 0; i < size; i++) {
+      if (buckets[i]) {
+        keys = [...keys, ...buckets[i].toArray("key")];
       }
     }
     return keys;
   }
 
-  values() {
+  function values() {
     let valueArr = [];
-    for (let i = 0; i < this.size; i++) {
-      if (this.buckets[i]) {
-        valueArr = [...valueArr, ...this.buckets[i].toArray("value")];
+    for (let i = 0; i < size; i++) {
+      if (buckets[i]) {
+        valueArr = [...valueArr, ...buckets[i].toArray("value")];
       }
     }
     return valueArr;
   }
 
-  entries() {
+  function entries() {
     let entriesArr = [];
-    for (let i = 0; i < this.size; i++) {
-      if (this.buckets[i]) {
+    for (let i = 0; i < size; i++) {
+      if (buckets[i]) {
         let checkNext = true;
-        let current = this.buckets[i].list;
+        let current = buckets[i].list;
 
         while (checkNext) {
           if (!current.next) checkNext = false;
@@ -126,6 +127,20 @@ const HashMap = class {
     }
     return entriesArr;
   }
+
+  function checkLoad() {
+    let load = length() / size;
+
+    if (load >= loadFactor) {
+      let data = entries();
+      size *= 2;
+      data.forEach((arr) => {
+        set(arr[0], arr[1]);
+      });
+    }
+  }
+
+  return { set, get, has, remove, length, keys, values, entries };
 };
 
 const hashMap = new HashMap();
@@ -148,7 +163,6 @@ hashMap.set("karma", 10);
 hashMap.set("carma", 50);
 hashMap.set("naruto", 18);
 
-console.log({ ...hashMap.buckets });
 console.log(hashMap.get("karma"));
 console.log(hashMap.get("johnson"));
 console.log(hashMap.has("karma"));
@@ -156,7 +170,7 @@ console.log(hashMap.has("johnson"));
 
 hashMap.remove("joe");
 hashMap.remove("sofia");
-console.log({ ...hashMap.buckets });
+
 console.log(hashMap.length());
 console.log(hashMap.keys());
 console.log(hashMap.values());
